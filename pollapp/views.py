@@ -30,3 +30,7 @@ def logout_view(request):
 
 def home(request):
     return render(request, 'polls/login.html')
+
+
+def signup(request):
+    
