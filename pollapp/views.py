@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.http import HttpResponse
 
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 
 def login_view(request):
@@ -10,16 +12,21 @@ def login_view(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return render(request, 'home.html')
+            messages.success(request,  'You have successfully logged in.')
+            return render(request, 'polls/home.html')
         else:
-            return render(request, 'login.html',{'error_message': 'Invalid username or password.'})
+            messages.error(request, 'Invalid username or password.')
+            return render(request, 'polls/login.html')
     else:
-        return render(request, 'login.html')
+        return render(request, 'polls/login.html')
 
 
-    return None
 
-
-def logout(request):
+def logout_view(request):
     logout(request)
-    return render(request, 'login.html')
+    messages.success(request, 'You have successfully logged out.')
+    return redirect('polls:home')
+
+
+def home(request):
+    return render(request, 'polls/login.html')
