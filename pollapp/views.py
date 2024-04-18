@@ -48,11 +48,12 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'polls/registration.html', {'form': form})
 
+
 @login_required
 def create_poll(request):
     if request.method == 'POST':
         poll_form = PollForm(request.POST)
-        choice_forms = [ChoiceForm(request.POST, prefix=str(x)) for x in range(3)]  # Adjust the range as needed
+        choice_forms = [ChoiceForm(request.POST, prefix=str(x)) for x in range(len(request.POST) - 2)]
         if poll_form.is_valid() and all([form.is_valid() for form in choice_forms]):
             poll = poll_form.save(commit=False)
             poll.created_by = request.user
@@ -64,12 +65,11 @@ def create_poll(request):
             return redirect('home')
     else:
         poll_form = PollForm()
-        choice_forms = [ChoiceForm(prefix=str(x)) for x in range(3)]  # Adjust the range as needed
+        choice_forms = [ChoiceForm(prefix=str(x)) for x in range(2)]
     return render(request, 'polls/create_poll.html', {'poll_form': poll_form, 'choice_forms': choice_forms})
+
+
 @login_required
 def list_polls(request):
     polls = Poll.objects.all()
-    return render(request, 'polls/list_polls.html', {"polls":polls})
-
-
-
+    return render(request, 'polls/list_polls.html', {"polls": polls})
