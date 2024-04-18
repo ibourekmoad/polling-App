@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-from .models import Poll
+from .models import Poll, Choice
 from .forms import PollForm, ChoiceForm
 
 
@@ -52,8 +52,9 @@ def signup(request):
 @login_required
 def create_poll(request):
     if request.method == 'POST':
+        num_choices = sum(1 for key in request.POST.keys() if key.startswith('choice_'))
         poll_form = PollForm(request.POST)
-        choice_forms = [ChoiceForm(request.POST, prefix=str(x)) for x in range(len(request.POST) - 2)]
+        choice_forms = [ChoiceForm(request.POST, prefix=str(x)) for x in range(num_choices)]
         if poll_form.is_valid() and all([form.is_valid() for form in choice_forms]):
             poll = poll_form.save(commit=False)
             poll.created_by = request.user
@@ -73,3 +74,11 @@ def create_poll(request):
 def list_polls(request):
     polls = Poll.objects.all()
     return render(request, 'polls/list_polls.html', {"polls": polls})
+
+
+@login_required
+def poll_detail(request, pk=None):
+    poll = Poll.objects.get(pk=pk)
+    choices = poll.choice_set.all()
+
+    return render(request, 'polls/poll_detail.html', {'poll':poll, 'choices': choices})
